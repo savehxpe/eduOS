@@ -10,7 +10,7 @@ import { hashPassword } from "@/lib/auth";
  * Per MASTER_CONTEXT Section 7: GET /api/users
  */
 export async function GET(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin"]);
+    const auth = await authenticateRequest(request, ["admin"]);
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(request.url);
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
  * Creates a new user (Admin only).
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin"]);
+    const auth = await authenticateRequest(request, ["admin"]);
     if (auth instanceof NextResponse) return auth;
 
     try {

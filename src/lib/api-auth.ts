@@ -6,10 +6,10 @@ import type { UserRole } from "@/lib/types";
  * Authenticates API request and verifies role authorization.
  * Returns the decoded JWT payload or a 401/403 error response.
  */
-export function authenticateRequest(
+export async function authenticateRequest(
     request: NextRequest,
     allowedRoles?: UserRole[]
-): { user: JWTPayload } | NextResponse {
+): Promise<{ user: JWTPayload } | NextResponse> {
     const authHeader = request.headers.get("authorization");
     const cookieToken = request.cookies.get("eduos-token")?.value;
     const token = extractToken(authHeader) || cookieToken;
@@ -21,7 +21,7 @@ export function authenticateRequest(
         );
     }
 
-    const payload = verifyToken(token);
+    const payload = await verifyToken(token);
     if (!payload) {
         return NextResponse.json(
             { success: false, error: "Invalid or expired token. Please log in again." },

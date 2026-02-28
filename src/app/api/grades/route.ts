@@ -10,7 +10,7 @@ import { bulkGradeSchema } from "@/lib/validators";
  * Workflow: Teacher inputs scores → system calculates % → saves to grades table
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     try {

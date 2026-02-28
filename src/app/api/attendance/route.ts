@@ -10,7 +10,7 @@ import { bulkAttendanceSchema } from "@/lib/validators";
  * Workflow: Teacher selects class + date → toggles status → system saves
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     try {
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
  * Retrieve attendance records filtered by class_id and/or date.
  */
 export async function GET(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(request.url);

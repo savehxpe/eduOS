@@ -11,7 +11,7 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ classId: string }> }
 ) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     const { classId } = await params;

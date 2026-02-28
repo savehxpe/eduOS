@@ -8,7 +8,7 @@ import { subjectSchema } from "@/lib/validators";
  * Fetches all subjects.
  */
 export async function GET(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     const { data, error } = await supabaseAdmin
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
  * Creates a new subject (Admin only).
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin"]);
+    const auth = await authenticateRequest(request, ["admin"]);
     if (auth instanceof NextResponse) return auth;
 
     try {

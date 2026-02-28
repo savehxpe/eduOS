@@ -1,7 +1,9 @@
-import jwt from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-change-me";
+const getSecret = () => new TextEncoder().encode(
+    process.env.JWT_SECRET || "fallback-secret-change-me"
+);
 
 export interface JWTPayload {
     userId: string;
@@ -9,13 +11,18 @@ export interface JWTPayload {
     email: string;
 }
 
-export function signToken(payload: JWTPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: "8h" });
+export async function signToken(payload: JWTPayload): Promise<string> {
+    return new SignJWT(payload as unknown as Record<string, unknown>)
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("8h")
+        .sign(getSecret());
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
     try {
-        return jwt.verify(token, JWT_SECRET) as JWTPayload;
+        const { payload } = await jwtVerify(token, getSecret());
+        return payload as unknown as JWTPayload;
     } catch {
         return null;
     }
@@ -23,7 +30,6 @@ export function verifyToken(token: string): JWTPayload | null {
 
 export function extractToken(authHeader: string | null): string | null {
     if (!authHeader) return null;
-    // Support both "Bearer <token>" and cookie-based
     if (authHeader.startsWith("Bearer ")) {
         return authHeader.slice(7);
     }

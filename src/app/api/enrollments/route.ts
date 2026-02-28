@@ -8,7 +8,7 @@ import { enrollmentSchema } from "@/lib/validators";
  * Lists enrollments (filtered by class_id or student_id).
  */
 export async function GET(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     const { searchParams } = new URL(request.url);
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
  * Enrolls a student in a class (Admin only).
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin"]);
+    const auth = await authenticateRequest(request, ["admin"]);
     if (auth instanceof NextResponse) return auth;
 
     try {

@@ -8,7 +8,7 @@ import { classSchema } from "@/lib/validators";
  * Fetches classes. Teachers see only their own.
  */
 export async function GET(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin", "teacher"]);
+    const auth = await authenticateRequest(request, ["admin", "teacher"]);
     if (auth instanceof NextResponse) return auth;
 
     let query = supabaseAdmin
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
  * Creates a new class (Admin only).
  */
 export async function POST(request: NextRequest) {
-    const auth = authenticateRequest(request, ["admin"]);
+    const auth = await authenticateRequest(request, ["admin"]);
     if (auth instanceof NextResponse) return auth;
 
     try {

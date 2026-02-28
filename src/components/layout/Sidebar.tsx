@@ -13,13 +13,15 @@ import {
     BarChart3,
     GraduationCap,
     UserCheck,
-    Settings,
+    X,
     ChevronLeft,
 } from "lucide-react";
 
 interface SidebarProps {
     collapsed: boolean;
     onToggle: () => void;
+    mobileOpen?: boolean;
+    onClose?: () => void;
 }
 
 interface NavItem {
@@ -54,79 +56,103 @@ const roleNavItems: Record<string, NavItem[]> = {
     ],
 };
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, mobileOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
     const { user } = useAuth();
 
     const navItems = user ? roleNavItems[user.role] || [] : [];
 
     return (
-        <aside
-            className={`
-        fixed left-0 top-0 h-screen bg-surface-900 text-white
-        flex flex-col z-40
-        transition-all duration-300 ease-in-out
-        ${collapsed ? "w-[72px]" : "w-[260px]"}
-`}
-        >
-            {/* Logo */}
-            <div className="flex items-center gap-3 px-5 h-16 border-b border-surface-700/50">
-                <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center font-bold text-sm shrink-0">
-                    eO
+        <>
+            {/* Mobile Backdrop */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 bg-surface-900/60 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
+
+            <aside
+                className={`
+          fixed left-0 top-0 h-screen bg-surface-900 text-white
+          flex flex-col z-50
+          transition-all duration-300 ease-in-out
+          ${collapsed ? "w-[72px]" : "w-[260px]"}
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
+            >
+                {/* Logo Section */}
+                <div className="flex items-center justify-between px-5 h-16 border-b border-surface-700/50">
+                    <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center font-bold text-sm shrink-0">
+                            eO
+                        </div>
+                        {(!collapsed || mobileOpen) && (
+                            <span className="text-lg font-bold tracking-tight">
+                                edu<span className="text-primary-400">OS</span>
+                            </span>
+                        )}
+                    </div>
+                    {/* Mobile close button */}
+                    <button
+                        onClick={onClose}
+                        className="lg:hidden p-2 text-surface-400 hover:text-white"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
                 </div>
-                {!collapsed && (
-                    <span className="text-lg font-bold tracking-tight">
-                        edu<span className="text-primary-400">OS</span>
-                    </span>
-                )}
-            </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 py-4 px-3 overflow-y-auto">
-                <ul className="space-y-1">
-                    {navItems.map((item) => {
-                        const isActive =
-                            pathname === item.href ||
-                            (item.href !== `/ ${user?.role} ` && pathname.startsWith(item.href));
+                {/* Navigation */}
+                <nav className="flex-1 py-4 px-3 overflow-y-auto">
+                    <ul className="space-y-1">
+                        {navItems.map((item) => {
+                            const isActive =
+                                pathname === item.href ||
+                                (item.href !== `/${user?.role}` && pathname.startsWith(item.href));
 
-                        return (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    className={`
-                    flex items - center gap - 3 px - 3 py - 2.5 rounded - lg
-min - h - [44px]
-text - sm font - medium
-transition - colors duration - 150
-                    ${isActive
-                                            ? "bg-primary-600/20 text-primary-400"
-                                            : "text-surface-300 hover:bg-surface-800 hover:text-white"
-                                        }
-`}
-                                    title={collapsed ? item.label : undefined}
-                                >
-                                    <span className="shrink-0">{item.icon}</span>
-                                    {!collapsed && <span>{item.label}</span>}
-                                </Link>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </nav>
+                            return (
+                                <li key={item.href}>
+                                    <Link
+                                        href={item.href}
+                                        onClick={() => {
+                                            if (onClose) onClose();
+                                        }}
+                                        className={`
+                      flex items-center gap-3 px-3 py-2.5 rounded-lg
+                      min-h-[44px]
+                      text-sm font-medium
+                      transition-colors duration-150
+                      ${isActive
+                                                ? "bg-primary-600/20 text-primary-400"
+                                                : "text-surface-300 hover:bg-surface-800 hover:text-white"
+                                            }
+                    `}
+                                        title={collapsed ? item.label : undefined}
+                                    >
+                                        <span className="shrink-0">{item.icon}</span>
+                                        {(!collapsed || mobileOpen) && <span>{item.label}</span>}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </nav>
 
-            {/* Collapse toggle */}
-            <div className="p-3 border-t border-surface-700/50">
-                <button
-                    onClick={onToggle}
-                    className="flex items-center justify-center w-full p-2.5 rounded-lg hover:bg-surface-800 text-surface-400 hover:text-white transition-colors min-h-[44px] cursor-pointer"
-                    aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                    <ChevronLeft
-                        className={`h - 5 w - 5 transition - transform ${collapsed ? "rotate-180" : ""} `}
-                    />
-                    {!collapsed && <span className="ml-2 text-sm">Collapse</span>}
-                </button>
-            </div>
-        </aside>
+                {/* Collapse toggle (Desktop only) */}
+                <div className="hidden lg:block p-3 border-t border-surface-700/50">
+                    <button
+                        onClick={onToggle}
+                        className="flex items-center justify-center w-full p-2.5 rounded-lg hover:bg-surface-800 text-surface-400 hover:text-white transition-colors min-h-[44px] cursor-pointer"
+                        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    >
+                        <ChevronLeft
+                            className={`h-5 w-5 transition-transform ${collapsed ? "rotate-180" : ""}`}
+                        />
+                        {!collapsed && <span className="ml-2 text-sm">Collapse</span>}
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 }
+
